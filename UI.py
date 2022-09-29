@@ -3,7 +3,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from pandas_datareader import data as pdr
-
+pio.templates
 import math
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
