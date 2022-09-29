@@ -1,4 +1,4 @@
-streamlit==1.9.0
+streamlit==1.11.1
 cufflinks==0.17.3
 scikit-learn
 scipy
