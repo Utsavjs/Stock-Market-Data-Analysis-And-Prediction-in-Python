@@ -2,7 +2,6 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-from pandas_datareader import data as pdr
 import math
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
@@ -17,8 +16,6 @@ import cufflinks as cf
 # print title of web app
 st.title("Stock Market Analysis and Prediction")
 
-
-
 # Create a text element and let the reader know the data is loading.
 data_load_state = st.text('Loading data...')
 
@@ -28,11 +25,10 @@ date_inputA = st.date_input('Enter Start Date')
 date_inputB = st.date_input('Enter End Date')
 
 # Load data from yahoo finance.
-
-data=pdr.get_data_yahoo(user_input, date_inputA, date_inputB)
+data = yf.download(user_input, start=date_inputA, end=date_inputB)
 
 #fill nan vale with next value within columns
-data.fillna(method="ffill",inplace=True)
+data.fillna(method="ffill", inplace=True)
 
 # Notify the reader that the data was successfully loaded.
 data_load_state.text('Loading data...done!')
@@ -44,17 +40,17 @@ if st.checkbox('Show raw data'):
  
 # show the description of data
 st.subheader('Detail description about Datasets:-')
-descrb=data.describe()
+descrb = data.describe()
 st.write(descrb)
 
 #create new columns like year, month, day
-data["Year"]=data.index.year
-data["Month"]=data.index.month
-data["Weekday"]=data.index.day_name()
+data["Year"] = data.index.year
+data["Month"] = data.index.month
+data["Weekday"] = data.index.day_name()
 
 # dislay graph of open and close column
 st.subheader('Graph of Close & Open:-')
-st.line_chart(data[["Open","Close"]])
+st.line_chart(data[["Open", "Close"]])
 
 # display plot of Adj Close column in datasets
 st.subheader('Graph of Adjacent Close:-')
@@ -77,7 +73,7 @@ forecast_col = 'Adj Close'
 forecast_out = int(math.ceil(0.01 * len(data)))
 data['label'] = data[forecast_col].shift(-forecast_out)
 
-X = np.array(data.drop(['label'], 1))
+X = np.array(data.drop(['label'], axis=1))
 X = preprocessing.scale(X)
 X_lately = X[-forecast_out:]
 X = X[:-forecast_out]
@@ -105,13 +101,13 @@ next_unix = last_unix + one_day
 for i in forecast_set:
     next_date = datetime.datetime.fromtimestamp(next_unix)
     next_unix += 86400
-    data.loc[next_date] = [np.nan for _ in range(len(data.columns)-1)]+[i]
+    data.loc[next_date] = [np.nan for _ in range(len(data.columns)-1)] + [i]
     last_date = data.iloc[-1].name
     dti = pd.date_range(last_date, periods=forecast_out+1, freq='D')
     index = 1
 for i in forecast_set:
     data.loc[dti[index]] = [np.nan for _ in range(len(data.columns)-1)] + [i]
-    index +=1
+    index += 1
 
 # display the forecast value.
 st.subheader('Forecast value :-')
@@ -119,20 +115,16 @@ st.dataframe(data.tail(50))
 
 # display the graph of adj close and forecast columns
 st.subheader('Graph of Adj Close and Forecast :-')
-st.line_chart(data[["Adj Close","Forecast"]])
-
+st.line_chart(data[["Adj Close", "Forecast"]])
 
 # Fetch the data for specified ticker e.g. AAPL from yahoo finance
-df_ticker = pdr.DataReader(user_input, 'yahoo', date_inputA, date_inputB)
+df_ticker = yf.download(user_input, start=date_inputA, end=date_inputB)
 
 st.header(f'{user_input} Stock Price')
-
-
 
 # Interactive data visualizations using cufflinks
 # Create candlestick chart 
 qf = cf.QuantFig(df_ticker, legend='top', name=user_input)
-
 
 # Technical Analysis Studies can be added on demand
 # Add Relative Strength Indicator (RSI) study to QuantFigure.studies
