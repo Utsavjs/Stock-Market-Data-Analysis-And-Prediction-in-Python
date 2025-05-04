@@ -27,6 +27,10 @@ date_inputB = st.date_input('Enter End Date')
 # Load data from yahoo finance.
 data = yf.download(user_input, start=date_inputA, end=date_inputB)
 
+if data.empty:
+    st.error(f"No data found for ticker '{user_input}' between {date_inputA} and {date_inputB}.")
+    st.stop()
+
 #fill nan vale with next value within columns
 data.fillna(method="ffill", inplace=True)
 
